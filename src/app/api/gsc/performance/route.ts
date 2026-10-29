@@ -8,8 +8,8 @@ import {
   getValidAccessToken,
   fetchSearchAnalytics,
   findUserGscIntegration,
+  aggregateRows,
   GscApiError,
-  type GscQueryRow,
 } from "@/lib/gsc/api";
 
 export const runtime = "nodejs";
@@ -25,26 +25,9 @@ const schema = z.object({
 });
 
 /**
- * CTR agregat = total klik / total impresi (BUKAN rata-rata CTR baris).
- * Posisi agregat dihitung dengan pembobotan impresi (bukan rata-rata naif),
- * sesuai definisi metrik Search Console.
+ * CTR agregat & posisi tertimbang kini ada di lib/gsc/api.ts (aggregateRows),
+ * dipakai bersama oleh route performance dan insights.
  */
-export function aggregateRows(rows: GscQueryRow[]) {
-  let clicks = 0;
-  let impressions = 0;
-  let weightedPos = 0;
-  for (const r of rows) {
-    clicks += r.clicks;
-    impressions += r.impressions;
-    weightedPos += r.position * r.impressions;
-  }
-  return {
-    clicks,
-    impressions,
-    ctr: impressions > 0 ? clicks / impressions : 0,
-    avgPosition: impressions > 0 ? weightedPos / impressions : 0,
-  };
-}
 
 export const POST = route(async (req) => {
   const user = await requireSessionUser();

@@ -100,6 +100,28 @@ export interface GscQueryRow {
   position: number;
 }
 
+/**
+ * CTR agregat = total klik / total impresi (BUKAN rata-rata CTR baris).
+ * Posisi agregat dihitung dengan pembobotan impresi (bukan rata-rata naif),
+ * sesuai definisi metrik Search Console.
+ */
+export function aggregateRows(rows: GscQueryRow[]) {
+  let clicks = 0;
+  let impressions = 0;
+  let weightedPos = 0;
+  for (const r of rows) {
+    clicks += r.clicks;
+    impressions += r.impressions;
+    weightedPos += r.position * r.impressions;
+  }
+  return {
+    clicks,
+    impressions,
+    ctr: impressions > 0 ? clicks / impressions : 0,
+    avgPosition: impressions > 0 ? weightedPos / impressions : 0,
+  };
+}
+
 export interface PerformanceParams {
   siteUrl: string;
   startDate: string; // YYYY-MM-DD

@@ -20,7 +20,7 @@ export default function LegalLayout({ children }: Readonly<{ children: React.Rea
         </div>
       </header>
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6">
-        <div className="space-y-6 leading-relaxed [&_h2]:mt-8 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mt-6 [&_h3]:text-base [&_h3]:font-medium [&_li]:ml-1 [&_p]:text-sm [&_p]:text-muted-foreground [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5">
+        <div className="space-y-6 leading-relaxed [&_h2]:mt-8 [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:mt-6 [&_h3]:text-base [&_h3]:font-medium [&_li]:ml-1 [&_p]:text-sm [&_p]:text-muted-foreground [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5 [&_code]:[overflow-wrap:anywhere]">
           {children}
         </div>
       </main>

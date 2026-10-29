@@ -623,3 +623,56 @@ ${opts.content.slice(0, 20_000)}
 </input_user>`,
   };
 }
+
+// ---------- 8. Keyword Intel (estimasi berlabel + sinyal autocomplete nyata) ----------
+export const keywordIntelZod = z.object({
+  intent: z.enum(["informational", "commercial", "transactional", "navigational"]),
+  competition: z.enum(["low", "medium", "high"]),
+  difficultyEstimate: z.number().int().min(0).max(100),
+  rationale: z.array(z.string()).max(6),
+  contentAngles: z.array(z.string()).max(8),
+  serpFeaturesLikely: z.array(z.string()).max(6),
+  limitations: z.array(z.string()).max(4),
+});
+
+export type KeywordIntelOutput = z.infer<typeof keywordIntelZod>;
+
+const keywordIntelSchema: GeminiSchema = {
+  type: "object",
+  properties: {
+    intent: { type: "string", enum: ["informational", "commercial", "transactional", "navigational"] },
+    competition: { type: "string", enum: ["low", "medium", "high"] },
+    difficultyEstimate: { type: "integer" },
+    rationale: { type: "array", items: { type: "string" } },
+    contentAngles: { type: "array", items: { type: "string" } },
+    serpFeaturesLikely: { type: "array", items: { type: "string" } },
+    limitations: { type: "array", items: { type: "string" } },
+  },
+  required: ["intent", "competition", "difficultyEstimate", "rationale", "contentAngles", "serpFeaturesLikely", "limitations"],
+};
+
+export function buildKeywordIntelPrompt(opts: {
+  userId: string;
+  projectId?: string;
+  keyword: string;
+  suggestions: string[];
+  model?: string;
+}): Omit<GenerateOptions<KeywordIntelOutput>, "tool"> {
+  return {
+    userId: opts.userId,
+    projectId: opts.projectId,
+    systemInstruction:
+      BASE_SYSTEM +
+      "\nPengecualian terbatas atas aturan 2: Anda BOLEH memberi PERKIRAAN keyword difficulty (0-100), level persaingan, dan intent search sebagai ESTIMASI kualitatif berdasar pengetahuan umum Anda, dengan syarat: (a) setiap angka/label harus berupa estimasi yang disertai alasan yang masuk akal; (b) tetap DILARANG mengarang angka search volume, CPC, atau jumlah hasil SERP; (c) jangan mengklaim melihat SERP langsung; (d) sertakan keterbatasan pada limitations. Sinyal autocomplete Google yang diberikan adalah DATA NYATA jumlah permintaan — pakai sebagai dasar penilaian popularitas/ variasi, bukan angka volume. Jawab dalam bahasa Indonesia.",
+    model: opts.model,
+    zodSchema: keywordIntelZod,
+    responseSchema: keywordIntelSchema,
+    maxOutputTokens: 2048,
+    temperature: 0.3,
+    prompt: `<input_user>
+Keyword: ${opts.keyword}
+Saran Google Autocomplete (data nyata, hl=id gl=id):
+${opts.suggestions.length ? opts.suggestions.map((s) => `- ${s}`).join("\n") : "(tidak ada saran)"}
+</input_user>`,
+  };
+}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
+import { ExternalLink } from "lucide-react";
 import ProjectPicker from "@/components/project-picker";
 import { useActiveProject } from "@/lib/ui/use-projects";
 import { apiFetch, errMessage } from "@/lib/ui/api";
@@ -38,6 +39,7 @@ export default function InternalLinksPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  const [openRow, setOpenRow] = useState<number | null>(null);
 
   const loadJobs = useCallback(async () => {
     if (!projectId) return;
@@ -59,6 +61,7 @@ export default function InternalLinksPage() {
     setBusy(true);
     setError(null);
     setResult(null);
+    setOpenRow(null);
     try {
       setResult(await apiFetch<Result>("/api/internal-links", {
         method: "POST",
@@ -147,17 +150,53 @@ export default function InternalLinksPage() {
                 {result.ai.recommendations.length === 0 ? (
                   <p className="text-sm text-slate-500">Tidak ada rekomendasi yang lolos validasi URL.</p>
                 ) : (
+                  <>
+                  <p className="mb-2 text-xs text-slate-400">Klik baris untuk melihat URL lengkap dan detail.</p>
                   <Table head={["Dari", "Ke", "Anchor", "Prioritas", "Alasan"]}>
                     {result.ai.recommendations.map((r, i) => (
-                      <tr key={i}>
-                        <td className="max-w-52 truncate px-3 py-2 text-slate-600">{r.fromUrl}</td>
-                        <td className="max-w-52 truncate px-3 py-2 text-slate-600">{r.toUrl}</td>
-                        <td className="px-3 py-2 text-slate-700">{r.anchor}</td>
-                        <td className="px-3 py-2"><Badge tone={r.priority === "high" ? "red" : r.priority === "medium" ? "amber" : "slate"}>{r.priority}</Badge></td>
-                        <td className="px-3 py-2 text-slate-500">{r.reason}</td>
-                      </tr>
+                      <Fragment key={i}>
+                        <tr
+                          className="cursor-pointer select-none hover:bg-slate-50"
+                          onClick={() => setOpenRow(openRow === i ? null : i)}
+                        >
+                          <td className="max-w-52 truncate px-3 py-2 text-slate-600" title={r.fromUrl}>{r.fromUrl}</td>
+                          <td className="max-w-52 truncate px-3 py-2 text-slate-600" title={r.toUrl}>{r.toUrl}</td>
+                          <td className="px-3 py-2 text-slate-700">{r.anchor}</td>
+                          <td className="px-3 py-2"><Badge tone={r.priority === "high" ? "red" : r.priority === "medium" ? "amber" : "slate"}>{r.priority}</Badge></td>
+                          <td className="max-w-72 truncate px-3 py-2 text-slate-500" title={r.reason}>{r.reason}</td>
+                        </tr>
+                        {openRow === i && (
+                          <tr className="bg-slate-50/70">
+                            <td colSpan={5} className="px-3 py-3">
+                              <div className="grid gap-3 text-sm md:grid-cols-2">
+                                <div>
+                                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Dari (tambah link di halaman ini)</p>
+                                  <a href={r.fromUrl} target="_blank" rel="noopener noreferrer" className="mt-0.5 inline-flex items-start gap-1 break-all text-indigo-600 hover:underline">
+                                    {r.fromUrl}<ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                  </a>
+                                </div>
+                                <div>
+                                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Ke (target link)</p>
+                                  <a href={r.toUrl} target="_blank" rel="noopener noreferrer" className="mt-0.5 inline-flex items-start gap-1 break-all text-indigo-600 hover:underline">
+                                    {r.toUrl}<ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                  </a>
+                                </div>
+                                <div>
+                                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Anchor disarankan</p>
+                                  <p className="mt-0.5 font-mono text-slate-700">&lt;a href=&quot;{r.toUrl}&quot;&gt;{r.anchor}&lt;/a&gt;</p>
+                                </div>
+                                <div>
+                                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Alasan lengkap</p>
+                                  <p className="mt-0.5 text-slate-600">{r.reason}</p>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
                     ))}
                   </Table>
+                  </>
                 )}
                 {result.ai.notes.length > 0 && (
                   <ul className="mt-3 list-disc pl-5 text-xs text-slate-500">{result.ai.notes.map((n) => <li key={n}>{n}</li>)}</ul>

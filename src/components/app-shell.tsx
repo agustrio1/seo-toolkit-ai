@@ -18,6 +18,7 @@ import {
   FileBarChart,
   History,
   Activity,
+  TrendingUp,
   Settings,
   LogOut,
   Menu,
@@ -35,6 +36,7 @@ const NAV: { group: string; items: { href: string; label: string; icon: typeof L
     group: "Research",
     items: [
       { href: "/keywords", label: "Keyword Workspace", icon: KeyRound },
+      { href: "/intel", label: "Keyword Intel", icon: TrendingUp },
       { href: "/clusters", label: "AI Clustering", icon: Layers },
     ],
   },

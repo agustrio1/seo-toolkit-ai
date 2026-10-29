@@ -22,6 +22,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Skrip bantu sekali-pakai dari alur deploy Vercel (CommonJS, bukan sumber app).
+    ".vercel-tmp/**",
   ]),
 ]);
 

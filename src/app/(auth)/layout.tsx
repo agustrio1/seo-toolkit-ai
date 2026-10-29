@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Sparkles } from "lucide-react";
 
 export default function AuthLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -14,6 +15,12 @@ export default function AuthLayout({ children }: Readonly<{ children: React.Reac
           </p>
         </div>
         {children}
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          Dengan mendaftar Anda menyetujui{" "}
+          <Link href="/terms" className="underline underline-offset-4 hover:text-foreground">Ketentuan Layanan</Link>
+          {" "}dan{" "}
+          <Link href="/privacy" className="underline underline-offset-4 hover:text-foreground">Kebijakan Privasi</Link>.
+        </p>
       </div>
     </div>
   );

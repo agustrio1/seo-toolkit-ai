@@ -1,0 +1,7 @@
+# Jangan pernah upload file env ke Vercel — gunakan `vercel env add`
+.env
+.env.*
+!.env.example
+.vercel-tmp
+scripts
+DOC.MD
